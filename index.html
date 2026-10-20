@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}</style>
+<title>Agras Spec Finder</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Agras Specs">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<meta name="theme-color" content="#c1122b">
+<style>
+/* Layout: one column, sticky search bar on top, answer cards below. System fonts only so the page works with no signal. */
+:root{
+  --bg:#eceef0; --surface:#ffffff; --sunk:#e3e6ea; --ink:#16181a; --muted:#59616a; --line:#cfd5da;
+  --band:#c1122b; --on-band:#ffffff; --accent:#b01028; --steel:#262a2e; --on-steel:#f1f3f4; --hit:#fff1d6;
+  --f-display:"Roboto Condensed","Arial Narrow","Helvetica Neue",Arial,system-ui,sans-serif;
+  --f-body:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121416; --surface:#1b1e21; --sunk:#262a2e; --ink:#eceef0; --muted:#9ca4ac; --line:#353a40;
+    --band:#b5112a; --on-band:#ffffff; --accent:#ff7a8a; --steel:#0a0b0c; --on-steel:#eceef0; --hit:#3a2e14; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121416; --surface:#1b1e21; --sunk:#262a2e; --ink:#eceef0; --muted:#9ca4ac; --line:#353a40;
+  --band:#b5112a; --on-band:#ffffff; --accent:#ff7a8a; --steel:#0a0b0c; --on-steel:#eceef0; --hit:#3a2e14; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;font-variant-numeric:tabular-nums;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--steel);color:var(--on-steel);padding-inline:16px;padding-block:12px 10px;border-bottom:4px solid var(--band)}
+.top-in{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.brand{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.brand h1{font-family:var(--f-display);font-weight:800;font-size:22px;letter-spacing:.04em;text-transform:uppercase;font-stretch:condensed}
+.brand span{font-size:12px;opacity:.75;letter-spacing:.06em;text-transform:uppercase;text-align:right}
+.box{display:flex;align-items:center;background:var(--surface);border-radius:6px;padding-inline:12px;gap:8px}
+.box svg{flex:none;width:20px;height:20px;stroke:var(--muted)}
+#q{flex:1;min-width:0;border:0;background:none;color:var(--ink);font-size:18px;padding-block:12px;outline:none}
+#q::placeholder{color:var(--muted)}
+#q::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none}
+@media (max-width:520px){.brand span{display:none}}
+#clear{border:0;background:none;color:var(--muted);font-size:14px;padding:6px 4px}
+.ranges[hidden]{display:none}
+.ranges{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding-inline:16px}
+.ranges::-webkit-scrollbar{display:none}
+.rchip{flex:none;border:1.5px solid rgba(255,255,255,.28);background:none;color:var(--on-steel);border-radius:20px;padding:5px 12px;font-size:14px}
+.rchip[aria-pressed="true"]{background:var(--band);border-color:var(--band)}
+main{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:16px 48px;display:flex;flex-direction:column;gap:14px}
+.status{color:var(--muted);font-size:14px}
+.label{font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:4px;padding:7px 11px;font-size:15px;font-weight:500}
+.chip small{color:var(--muted);font-weight:400}
+.card{background:var(--surface);border:1px solid var(--line);min-width:0}
+.card-h{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:10px 14px 0}
+.eyebrow{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.card h2{font-size:19px;font-weight:650;line-height:1.25;padding:2px 14px 10px;text-wrap:balance}
+.ans{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.ans-row{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr);gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);align-items:baseline}
+.ans-row:last-child{border-bottom:0}
+.ans-row .m{font-weight:600;font-size:15px}
+.ans-row .v{font-size:20px;font-weight:700;color:var(--accent);overflow-wrap:anywhere;line-height:1.25}
+.ans-row .v.long{font-size:16px;font-weight:600;color:var(--ink)}
+.others{border-top:1px solid var(--line);padding:8px 14px 10px;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--muted)}
+.others b{color:var(--ink);font-weight:600}
+.src{font-size:12px;color:var(--muted);padding:0 14px 10px}
+.band{background:var(--band);color:var(--on-band);font-family:var(--f-display);font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.band h2{font-size:22px;padding:0;font-weight:800}
+.band span{font-size:13px;font-weight:600;opacity:.9;text-align:right}
+.sec{font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--sunk);padding:7px 14px}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:12px;padding:8px 14px;border-bottom:1px solid var(--line);font-size:15px}
+.kv:last-child{border-bottom:0}
+.kv .k{color:var(--muted)}
+.kv .v{font-weight:600;overflow-wrap:anywhere}
+.kv.hit{background:var(--hit)}
+.mlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;padding:12px 14px 14px}
+.mbtn{border:1.5px solid var(--line);background:var(--surface);border-radius:4px;padding:10px 12px;text-align:left;font-weight:600;font-size:15px}
+.mbtn small{display:block;color:var(--muted);font-weight:400;font-size:13px}
+.empty{background:var(--surface);border:1px dashed var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:8px}
+.foot{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px;max-width:64ch}
+.back{align-self:flex-start;border:0;background:none;color:var(--accent);font-weight:600;padding:4px 0}
+@media (min-width:600px){.ans-row{grid-template-columns:minmax(0,12em) minmax(0,1fr)}}
+</style>
+</head><body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><h1>Agras Spec Finder</h1><span>Middelburg Case International</span></div>
+    <label class="box" for="q">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+      <input id="q" type="search" inputmode="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. t70p spray width">
+      <button id="clear" type="button" hidden>Clear</button>
+    </label>
+    <div class="ranges" id="ranges" role="group" aria-label="Filter by range"></div>
+  </div>
+</header>
+<main id="out"></main>
+
+<script>
+"use strict";
+/* ================= DATA (transcribed from the dealership's brochures) =================
+   Each row: [section, label, value]. value is one string for every model, or an array with one entry per model ('' = not listed). */
+const RANGES=[{id:'agras',n:'Agras'}];
+const D=[
+{id:'agras',r:'agras',name:'DJI Agras spray drones',kw:'dji agras drone drones spray sprayer spuit hommeltuig',src:'DJI Agriculture spec pages (ag.dji.com)',
+ models:[['Agras T50','t50 50'],['Agras T70P','t70p t70 70p 70'],['Agras T100','t100 100']],
+ rows:[
+ ['Aircraft','Aircraft weight',['52 kg with battery (39.9 kg without)','52 kg with DB1580 battery / 56 kg with DB2160','Spraying: 75 kg (2 nozzles) / 77 kg (4 nozzles); spreading 75 kg; lifting 65 kg (90 kg dual-battery lifting)']],
+ ['Aircraft','Max takeoff weight, spraying',['92 kg','DB1580: 102 kg (2 nozzles) / 105 kg (4 nozzles); DB2160: 126 kg (2 nozzles) / 130 kg (4 nozzles)','175 kg (2 nozzles) / 177 kg (4 nozzles); 149.9 kg limit in Australia and Turkey']],
+ ['Aircraft','Max takeoff weight, spreading',['103 kg','126 kg (DB1580) / 130 kg (DB2160)','175 kg']],
+ ['Aircraft','Max takeoff weight, lifting',['','115 kg (DB1580) / 118.5 kg (DB2160)','165 kg (170 kg dual-battery lifting)']],
+ ['Aircraft','Max diagonal wheelbase',['2,200 mm','2,440 mm','2,330 mm']],
+ ['Aircraft','Size, arms and propellers unfolded',['2,800 × 3,085 × 820 mm','3,200 × 3,520 × 960 mm','3,220 × 3,224 × 975 mm']],
+ ['Aircraft','Size, arms unfolded and propellers folded',['1,590 × 1,900 × 820 mm','1,820 × 2,100 × 960 mm','1,820 × 1,840 × 975 mm']],
+ ['Aircraft','Size, arms and propellers folded (transport)',['1,115 × 750 × 900 mm','1,160 × 900 × 960 mm','1,105 × 1,265 × 975 mm']],
+ ['Aircraft','Hovering accuracy',['RTK: ±10 cm horizontal and vertical; without RTK: ±60 cm horizontal, ±30 cm vertical','RTK: ±10 cm horizontal and vertical; without RTK: ±0.6 m horizontal, ±0.3 m vertical','RTK: ±10 cm horizontal and vertical; without RTK: ±0.6 m horizontal, ±0.3 m vertical']],
+ ['Aircraft','Max configurable flight radius','2 km'],
+ ['Aircraft','Max wind resistance','6 m/s'],
+ ['Aircraft','Operating temperature',['Not listed','0 to 40 °C','0 to 40 °C']],
+ ['Aircraft','Flight time per battery (working)',['7–10 min spraying or spreading (dealership figure)','About 10 min with a full tank (dealer estimate)','About 9–13 min with a full tank, up to about 23 min empty (retailer estimate)']],
+ ['Aircraft','Max operation speed',['','20 m/s','20 m/s']],
+ ['Aircraft','Recommended flight altitude',['','More than 3 m','More than 3 m']],
+ ['Propulsion','Motors (stator size, KV)',['100 × 33 mm, 48 rpm/V, 4,000 W per rotor','155 × 22 mm, 65 rpm/V','155 × 16 mm, 60 rpm/V']],
+ ['Propulsion','Propellers',['54 inch, nylon carbon fiber','62 inch, carbon fiber composite','62 inch, carbon fiber composite']],
+ ['Spraying','Spray tank volume',['40 l','70 l','100 l (dual-battery spraying system also 100 l)']],
+ ['Spraying','Spray tank operating payload',['40 kg','70 kg','100 kg (90 kg with dual-battery spraying system)']],
+ ['Spraying','Spray tank material','HDPE'],
+ ['Spraying','Effective spray width',['4–11 m (3 m above the crop)','4–11 m','5–13 m']],
+ ['Spraying','Max flow rate',['16 l/min (2 sprinklers), 24 l/min (4 sprinklers)','30 l/min (standard 2 nozzles), 40 l/min (optional 4 nozzles)','30 l/min (standard 2 nozzles), 40 l/min (optional 4 nozzles)']],
+ ['Spraying','Sprinklers / nozzles',['LX8060SZ, 2 standard','LX07550SX, 2 standard; 4 optional (LX09550SX mist nozzle optional)','LX07550SX, 2 standard; 4 optional (LX09510DX mist nozzle optional)']],
+ ['Spraying','Nozzle distance',['1,570 mm (rear nozzles)','1,874 mm (rear nozzles)','1,834 mm (outermost nozzles)']],
+ ['Spraying','Droplet size','50–500 μm'],
+ ['Spraying','Delivery pumps','2 impeller pumps, magnetic drive'],
+ ['Spreading','Spreading tank volume',['75 l','100 l','150 l']],
+ ['Spreading','Max load in spreading tank',['50 kg','70 kg','100 kg']],
+ ['Spreading','Effective spreading width',['8 m','3–10 m','3–10 m (3 m height, 1,100 rpm disc)']],
+ ['Spreading','Max discharge rate',['Not listed','400 kg/min (compound fertilizer)','400 kg/min (compound fertilizer)']],
+ ['Spreading','Granule sizes',['0.5–5 mm dry granules','Standard: extra-large auger 0.5–10 mm (fertilizer, wheat, feed), medium auger 4–6 mm (rice). Optional: large 4–10 mm, small 0.5–4 mm (rapeseed, granular herbicides and insecticides)','Standard: extra-large auger 0.5–10 mm (fertilizer, wheat, feed), medium auger 4–6 mm (rice). Optional: large 4–10 mm, small 0.5–4 mm (rapeseed, granular herbicides and insecticides)']],
+ ['Spreading','Spreader type',['Not listed','Centrifugal disc, Spreading System 4.0','Centrifugal disc, screw feeder, Spreading System 4.0']],
+ ['Lifting','Lifting load capacity',['No lifting system listed','65 kg','100 kg (80 kg dual-battery lifting system)']],
+ ['Lifting','Lifting cable length',['','10 m standard, 10–15 m recommended','10 m standard, 10–15 m recommended']],
+ ['Safety','Obstacle sensing system',['Front and rear phased array radar, binocular vision','Safety System 3.0: front and rear mmWave radar, tri-eye vision','Safety System 3.0: LiDAR (laser radar) for wires, poles and pylons, plus front, downward and rear radar, quad vision, FPV camera']],
+ ['Safety','Sensing range',['Radar 1–50 m, vision 0.5–29 m','Up to 60 m','Up to 60 m']],
+ ['Safety','Max obstacle avoidance speed',['10 m/s horizontal, 3 m/s vertical','13.8 m/s','13.8 m/s']],
+ ['Safety','Obstacle avoidance height',['Fly more than 1.5 m above obstacles','1.5 m or more','1.5 m or more']],
+ ['Safety','Safe stopping distance',['Not listed','2.5 m','2.5 m']],
+ ['Remote controller','Remote controller',['RM700B','TKPL 2','TKPL 2']],
+ ['Remote controller','Screen',['7.02 inch LCD touchscreen, 1920 × 1200, 1,200 cd/m²','7 inch LCD touchscreen, 1920 × 1200, 1,400 cd/m²','7 inch LCD touchscreen, 1920 × 1200, 1,400 cd/m²']],
+ ['Remote controller','Battery runtime (internal / external)',['3 h 18 min / 2 h 42 min','3.8 h / 3.2 h','3.8 h / 3.2 h']],
+ ['Remote controller','Transmission range',['7 km (FCC), 5 km (SRRC), 4 km (MIC/CE)','Relay: 8 km (FCC), 5 km (SRRC), 4 km (MIC/KCC/CE)','Relay: 8 km (FCC), 5 km (SRRC), 4 km (MIC/KCC/CE)']],
+ ['Remote controller','Charging',['About 2 hours, USB-C up to 65 W','2 hours, USB-C up to 65 W','2 hours, USB-C up to 65 W']],
+ ['Batteries','Flight battery',['DB1560','DB1580 or DB2160 (DB2212 also listed)','DB2160 (DB2212 also listed)']],
+ ['Batteries','Battery capacity',['30,000 mAh','DB1580: 30,000 mAh; DB2160: 41,000 mAh','41,000 mAh']],
+ ['Batteries','Battery weight',['About 12.1 kg','DB1580: 11.7 kg; DB2160: 14.7 kg','DB2160: 14.7 kg; DB2212: 15 kg']],
+ ['Batteries','Battery voltage',['52.22 V','52 V','52 V']],
+ ['Batteries','Battery cycle life',['','DB2160: up to 1,500 cycles (dealer listing)','DB2160: up to 1,500 cycles (dealer listing)']],
+ ['Batteries','Smaller battery limit',['','On the DB1580 the spray tank is limited to roughly 50 l; the full 70 l needs the DB2160','']],
+ ['Charging','Generator',['D12000iE: DC charging 9,000 W, AC 230 V / 1,500 W, 30 l fuel tank','D14000iE: 30 l fuel tank, AC 220 V / 1,500 W','D14000iE: DC charging 11,500 W, AC 220 V / 1,500 W, 30 l fuel tank, 87 kg, unleaded petrol']],
+ ['Charging','Smart charger',['C10000 (9,000 W max on 220–240 V, about 11.4 kg)','C12000 (12,000 W three-phase 380 V, 3,000 W single-phase 220 V, 13.13 kg)','C12000 (12,000 W three-phase 380 V, 3,000 W single-phase 220 V, 13.13 kg)']],
+ ['Charging','Battery charge time',['9–12 min to fully charge a DB1560','7–8 min (DB1580), 8–9 min (DB2160), 30% to 95%','8–9 min (DB2160), 30% to 95%']],
+ ['Accessories','RTK base station',['Not listed','D-RTK 3 AG (IP67, 7 h, up to 15 km FCC / 8 km CE)','D-RTK 3 AG (IP67, 7 h, up to 15 km FCC / 8 km CE)']],
+ ['Accessories','Relay',['Not listed','IP55, 5 h operation','IP55, 5 h operation, 6,500 mAh']]
+]}
+];
+/* drop empty helper rows */
+D.forEach(t=>{t.rows=t.rows.filter(r=>r.length===3&&(typeof r[2]==='string'?r[2]!=='':r[2].some(x=>x)))});
+
+/* ================= SEARCH ================= */
+const STOP=new Set('the of a an what whats is are how much many does do on for with and vs versus to in it its this that me tell give van die wat hoe is en op vir met se n by watter'.split(' '));
+const SYN={
+ horsepower:['power'],hp:['power','hp'],kw:['power','kw'],pk:['power'],krag:['power'],perdekrag:['power'],engine:['engine','power'],
+ diesel:['fuel','diesel'],brandstof:['fuel'],tenk:['tank'],
+ nm:['torque'],draaimoment:['torque'],wringkrag:['torque'],
+ gearbox:['transmission','gearbox'],gears:['transmission','speeds'],ratkas:['transmission'],powershift:['powershift','transmission'],cvt:['cvxdrive','cvt'],
+ tire:['tyre'],tires:['tyre'],tyres:['tyre'],tyre:['tyre'],band:['tyre'],bande:['tyre'],wheels:['tyre','wheel'],
+ mass:['weight'],gewig:['weight'],swaar:['weight'],weeg:['weight'],heavy:['weight'],weigh:['weight'],ballast:['ballasted','weight'],
+ wielbasis:['wheelbase'],base:['wheelbase','base'],
+ hef:['lift'],hefvermoe:['lift'],lifting:['lift'],linkage:['linkage','lift','hitch'],'3pt':['linkage','hitch','lift'],hitch:['hitch','lift'],
+ spools:['remote'],spool:['remote'],scv:['remote'],remotes:['remote'],valves:['valve','remote'],kleppe:['valve','remote'],
+ hydraulics:['hydraulic'],hidroulies:['hydraulic'],lpm:['flow'],pump:['pump','flow'],pomp:['pump','flow'],
+ circle:['turning'],draai:['turning'],draaisirkel:['turning'],
+ kph:['speed'],kmh:['speed'],spoed:['speed'],fast:['speed'],
+ bin:['grain'],hopper:['grain','tank'],graantenk:['grain'],
+ adblue:['urea','emission'],def:['urea'],emissions:['emission','tier','stage'],emission:['emission','tier','stage'],
+ table:['header'],platform:['header'],cutterbar:['header'],tafel:['header'],snybord:['header'],
+ offload:['unloading'],uitlaai:['unloading'],
+ breedte:['width'],wydte:['width'],wide:['width'],lengte:['length'],long:['length'],hoogte:['height'],tall:['height'],
+ cylinders:['cylinder'],cyl:['cylinder'],silinders:['cylinder'],
+ litre:['displacement','engine'],liter:['displacement','engine'],cc:['displacement','cc'],size:['displacement','size'],
+ tracks:['track'],spore:['track'],
+ spray:['spray','boom','nozzle'],spuit:['spray','boom','sprayer'],nozzles:['nozzle'],nossels:['nozzle'],
+ grondvryhoogte:['clearance'],cabin:['cab'],kajuit:['cab'],battery:['battery','alternator'],
+ trekker:['tractor'],stroper:['combine'],sprayers:['sprayer'],combines:['combine'],
+ warranty:['warranty'],waarborg:['warranty'],gps:['guidance','accuguide'],autosteer:['guidance','accuguide'],steering:['steering','steer']
+};
+const norm=s=>String(s).toLowerCase().replace(/(\d),(?=\d{3}\b)/g,'$1').replace(/[’'"]/g,'').replace(/ë/g,'e').replace(/ê/g,'e').replace(/ô/g,'o');
+const words=s=>norm(s).match(/[a-z0-9]+(?:\.[0-9]+)?/g)||[];
+const isNum=w=>/^\d/.test(w);
+function tokens(q){
+  let t=words(q).filter(w=>w.length>1||isNum(w));
+  const kept=t.filter(w=>!STOP.has(w));
+  return kept.length?kept:t;
+}
+function hits(alt,ws){
+  const a=alt.p;
+  for(const w of ws){
+    if(isNum(a)?w===a:(a.length<3?w===a:w.startsWith(a)))return true;
+    for(const x of alt.x)if(w===x||w===x+'s')return true;
+  }
+  return false;
+}
+/* prepare word lists */
+D.forEach(t=>{
+  t.rangeWords=words(t.name+' '+t.kw+' '+RANGES.find(r=>r.id===t.r).n);
+  t.mWords=t.models.map(m=>words(m[0]+' '+m[1]));
+  t.rows.forEach(r=>{
+    r.lw=words(r[1]);r.sw=words(r[0]);
+    r.vw=t.models.map((m,i)=>words(typeof r[2]==='string'?r[2]:r[2][i]||''));
+  });
+});
+const valOf=(r,i)=>typeof r[2]==='string'?r[2]:(r[2][i]||'');
+
+function known(t){
+  const alt={p:t,x:SYN[t]||[]};
+  return D.some(d=>hits(alt,d.rangeWords)||d.mWords.some(w=>hits(alt,w))||d.rows.some(r=>hits(alt,r.lw)||hits(alt,r.sw)||r.vw.some(w=>hits(alt,w))));
+}
+function search(q,range){
+  const all=tokens(q);if(!all.length)return null;
+  const res=searchT(all,range);
+  if((res.cards&&res.cards.length)||res.sheets||res.picker)return res;
+  const tk=all.filter(known),skipped=all.filter(t=>!known(t));
+  if(!tk.length||!skipped.length)return res;
+  const r2=searchT(tk,range);r2.skipped=skipped;return r2;
+}
+function searchT(tk,range){
+  const alts=tk.map(t=>({p:t,x:SYN[t]||[]}));
+  const tables=D.filter(t=>range==='all'||t.r===range);
+  const sheets=[],cards=[];
+  for(const t of tables){
+    // which tokens each model covers by name / range
+    const mh=t.models.map((m,i)=>alts.map(a=>hits(a,t.mWords[i])||hits(a,t.rangeWords)));
+    const named=t.models.map((m,i)=>alts.some((a,k)=>hits(a,t.mWords[i])&&!hits(a,t.rangeWords)));
+    // model-only query → sheet
+    t.models.forEach((m,i)=>{if(mh[i].every(Boolean)&&(named[i]||tk.length===alts.filter((a,k)=>hits(a,t.rangeWords)).length))sheets.push({t,i,named:named[i]})});
+    t.rows.forEach((r,ri)=>{
+      const lh=alts.map(a=>hits(a,r.lw)),sh=alts.map(a=>hits(a,r.sw));
+      const anyRow=lh.some(Boolean)||sh.some(Boolean);
+      const ms=[];let best=0;
+      t.models.forEach((m,i)=>{
+        if(!valOf(r,i))return;
+        let sc=0,ok=true,rowTok=false;
+        alts.forEach((a,k)=>{
+          if(lh[k]){sc+=4;rowTok=true}else if(sh[k]){sc+=2;rowTok=true}
+          else if(mh[i][k]){sc+=3}
+          else if(hits(a,r.vw[i])){sc+=1;rowTok=true}
+          else ok=false;
+        });
+        if(ok&&rowTok){ms.push(i);if(sc>best)best=sc}
+      });
+      if(ms.length){
+        const anyNamed=ms.some(i=>named[i]);
+        const focus=anyNamed?ms.filter(i=>named[i]):ms;
+        const lead=r.lw.length?2*lh.filter(Boolean).length/r.lw.length:0;
+        cards.push({t,r,ri,focus,score:best+lead+(anyNamed?2:0)+(anyRow?1:0)});
+      }
+    });
+  }
+  // when the query only names models, show their sheets instead of every row that mentions them
+  const namedSheets=sheets.filter(s=>s.named);
+  if(namedSheets.length&&!cards.some(c=>c.r.lw.length&&alts.some(a=>hits(a,c.r.lw)||hits(a,c.r.sw)))){
+    return {sheets:namedSheets,cards:[]};
+  }
+  if(sheets.length&&!cards.length)return {picker:sheets};
+  cards.sort((a,b)=>b.score-a.score||D.indexOf(a.t)-D.indexOf(b.t)||a.ri-b.ri);
+  return {cards:cards.slice(0,40),total:cards.length};
+}
+
+/* ================= UI ================= */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const St={q:'',range:'all',sheet:null};
+const KEY='agras-spec-finder.v1';
+function loadPrefs(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+function savePrefs(p){try{localStorage.setItem(KEY,JSON.stringify(p))}catch(e){}}
+let prefs=loadPrefs();if(!Array.isArray(prefs.recent))prefs.recent=[];
+
+const QUICK=['Spray tank','Spray width','Flow rate','Spreading tank','Takeoff weight','Battery','Charge time','Generator','Remote controller','Obstacle avoidance','Lifting','Wheelbase'];
+const short=n=>n.replace(/^Agras /,'');
+function isLong(v){return v.length>28}
+
+function cardHTML(c){
+  const {t,r,focus}=c,all=t.models.map((m,i)=>i).filter(i=>valOf(r,i));
+  const single=typeof r[2]==='string';
+  let body='';
+  if(single){
+    body=`<div class="ans"><div class="ans-row"><span class="m">${esc(focus.length===t.models.length||focus.length>2?'All models':focus.map(i=>t.models[i][0]).join(', '))}</span><span class="v${isLong(r[2])?' long':''}">${esc(r[2])}</span></div></div>`;
+  }else{
+    body=`<div class="ans">${focus.map(i=>`<div class="ans-row"><span class="m">${esc(t.models[i][0])}</span><span class="v${isLong(valOf(r,i))?' long':''}">${esc(valOf(r,i))}</span></div>`).join('')}</div>`;
+    const rest=all.filter(i=>!focus.includes(i));
+    if(rest.length)body+=`<div class="others">${rest.map(i=>`<span>${esc(short(t.models[i][0]))}: <b>${esc(valOf(r,i))}</b></span>`).join('')}</div>`;
+  }
+  return `<article class="card"><div class="card-h"><span class="eyebrow">${esc(t.name)} · ${esc(r[0])}</span></div><h2>${esc(r[1])}</h2>${body}<div class="src">Source: ${esc(t.src)}</div></article>`;
+}
+function sheetHTML(t,i,hl){
+  const secs=[];t.rows.forEach(r=>{const v=valOf(r,i);if(!v)return;let s=secs.find(x=>x.n===r[0]);if(!s)secs.push(s={n:r[0],rows:[]});s.rows.push([r[1],v])});
+  return `<article class="card"><div class="band"><h2>${esc(t.models[i][0])}</h2><span>${esc(t.name)}</span></div>
+   ${secs.map(s=>`<div class="sec">${esc(s.n)}</div>${s.rows.map(x=>`<div class="kv"><span class="k">${esc(x[0])}</span><span class="v">${esc(x[1])}</span></div>`).join('')}`).join('')}
+   <div class="src" style="padding-top:10px">Source: ${esc(t.src)}</div></article>`;
+}
+function browseHTML(){
+  const recent=prefs.recent.length?`<div class="label">Recent</div><div class="chips">${prefs.recent.map(r=>`<button class="chip" data-q="${esc(r)}">${esc(r)}</button>`).join('')}</div>`:'';
+  const tabs=D.filter(t=>St.range==='all'||t.r===St.range);
+  return `${recent}<div class="label">Quick look-ups</div><div class="chips">${QUICK.map(q=>`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+   <div class="label">Browse models</div>
+   ${tabs.map(t=>`<section class="card"><div class="band"><h2>${esc(t.name)}</h2><span>${t.models.length} models</span></div><div class="mlist">${t.models.map(m=>`<button class="mbtn" data-q="${esc(m[0])}">${esc(m[0])}<small>${esc(({'Agras T50':'40 l tank · 4–11 m swath','Agras T70P':'70 l tank · 4–11 m swath','Agras T100':'100 l tank · 5–13 m swath'})[m[0]]||'')}</small></button>`).join('')}</div></section>`).join('')}
+   <div class="foot"><p>Everything on this page is stored inside it, so search keeps working with no signal once the page is open.</p><p>Figures come from DJI Agriculture's official spec pages. Flight times are dealer estimates; DJI does not publish them. Where local stock or a South African DJI sheet differs, the local figure wins.</p></div>`;
+}
+function render(){
+  const out=$('out');$('clear').hidden=!St.q;
+  if(!St.q.trim()){out.innerHTML=browseHTML();return}
+  const res=search(St.q,St.range);
+  if(!res){out.innerHTML=browseHTML();return}
+  const skip=res.skipped?`<p class="status">No match for “${esc(res.skipped.join(' '))}”, so it was left out.</p>`:'';
+  if(res.sheets){out.innerHTML=skip+res.sheets.slice(0,3).map(s=>sheetHTML(s.t,s.i)).join('')+(res.sheets.length>3?`<p class="status">${res.sheets.length-3} more models match. Add the model number to narrow it down.</p>`:'');return}
+  if(res.picker){out.innerHTML=`<p class="status">Pick a model, or add a spec such as “lift” or “fuel”.</p><section class="card"><div class="mlist">${res.picker.map(s=>`<button class="mbtn" data-q="${esc(s.t.models[s.i][0])}">${esc(s.t.models[s.i][0])}<small>${esc(s.t.name)}</small></button>`).join('')}</div></section>`;return}
+  if(!res.cards.length){out.innerHTML=`<div class="empty"><strong>Nothing found for “${esc(St.q)}”.</strong><span class="status">Try a model and a spec, such as “magnum 340 lift”, “puma fuel” or “8260 grain tank”. You can also tap a model under Browse.</span><button class="back" data-q="">Back to browse</button></div>`;return}
+  out.innerHTML=skip+`<p class="status">${res.total} answer${res.total===1?'':'s'}${res.total>40?', showing the best 40':''}</p>`+res.cards.map(cardHTML).join('');
+}
+let tRecent=null;
+function setQ(q,push){
+  St.q=q;$('q').value=q;render();
+  clearTimeout(tRecent);
+  if(q.trim())tRecent=setTimeout(()=>{const v=q.trim();prefs.recent=[v,...prefs.recent.filter(x=>x.toLowerCase()!==v.toLowerCase())].slice(0,6);savePrefs(prefs)},1500);
+  if(push)try{window.scrollTo({top:0})}catch(e){}
+}
+function boot(){
+  if(RANGES.length<2)$('ranges').hidden=true;
+  $('ranges').innerHTML=[{id:'all',n:'All'},...RANGES].map(r=>`<button class="rchip" data-r="${r.id}" aria-pressed="${St.range===r.id}">${esc(r.n)}</button>`).join('');
+  $('ranges').addEventListener('click',e=>{const b=e.target.closest('[data-r]');if(!b)return;St.range=b.dataset.r;document.querySelectorAll('.rchip').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.r===St.range)));render()});
+  $('q').addEventListener('input',e=>setQ(e.target.value));
+  $('q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.target.blur()}});
+  $('clear').addEventListener('click',()=>{setQ('');$('q').focus()});
+  $('out').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;setQ(b.dataset.q,true)});
+  render();
+}
+if(typeof globalThis!=='undefined')globalThis.__finder={D,search};
+if(typeof document!=='undefined')boot();
+</script>
+
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+</script>
+</body></html>
